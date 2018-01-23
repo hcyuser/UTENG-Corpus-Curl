@@ -1,2 +1,5 @@
 # ignore vim temp files.
 *~
+
+# ignore npm modules.
+node_modules
