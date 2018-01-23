@@ -16,5 +16,7 @@
     "url": "https://github.com/hcyuser/UT_ENG_Curl/issues"
   },
   "homepage": "https://github.com/hcyuser/UT_ENG_Curl#readme",
-  "dependencies": {}
+  "dependencies": {
+    "jsdom": "^11.6.0"
+  }
 }
