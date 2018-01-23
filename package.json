@@ -1,0 +1,20 @@
+{
+  "name": "ut_eng_curl",
+  "version": "1.0.0",
+  "description": "Just for installing npm package.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hcyuser/UT_ENG_Curl.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/hcyuser/UT_ENG_Curl/issues"
+  },
+  "homepage": "https://github.com/hcyuser/UT_ENG_Curl#readme",
+  "dependencies": {}
+}
