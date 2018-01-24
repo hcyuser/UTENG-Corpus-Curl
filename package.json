@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "main": "node app.js",
-    "test": "node ppp.js 231419"
+    "test": "node ppp.js 231419",
+    "NF": "node ppp.js 231420"
   },
   "repository": {
     "type": "git",
