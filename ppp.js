@@ -24,12 +24,14 @@ let tid = process.argv[2];
 puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox']
 }).then(async browser => {
-    // Create new Page object and change default navigation timeout
+    // Create new Page object and
+    //  change default navigation timeout to 10 second
     const page = await browser.newPage();
-    page.setDefaultNavigationTimeout(20000);
+    page.setDefaultNavigationTimeout(10000);
 
     // Create and goto the ShowRatings.jsp?tid=<tid> of www.ratemyprofessors.com
     page.on('load', load => console.log("Finish Loading!"));
+    // 
     let response;
     try {
         response = await page.goto(URL + tid);
