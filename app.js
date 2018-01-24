@@ -4,13 +4,15 @@ const puppeteer = require('puppeteer');
     let browser = await puppeteer.launch(
         {args: ['--no-sandbox', '--disable-setuid-sandbox']});
     let page = await browser.newPage();
-    await page.goto('http://www.ratemyprofessors.com/ShowRatings.jsp?tid=231419');
+    await page.goto('http://www.ratemyprofessors.com/ShowRatings.jsp?tid=231519');
 
     let result = { isNone: false };
     while (!result.isNone) {
         result = await page.evaluate(() => {
             let loadMore = document.getElementById('loadMore');
-            loadMore.click();
+            // If comments <= 20, the loadMore tag will not exist.
+            if (!loadMore) loadMore = { style: { display: 'none;' } };
+            else loadMore.click();
             for (let i = 0; i < 1e8; i++);
             let isNone = (loadMore.style.display.length != 0);
             if (isNone) {
@@ -21,8 +23,22 @@ const puppeteer = require('puppeteer');
                 let firstName = teacherName.querySelector('span.pfname').innerHTML.trim();
                 let lastName = teacherName.querySelector('span.plname').innerHTML.trim();
 
-                let teacherTitle = block.querySelector('div.result-title');
-                let title = teacherTitle.textContent;
+                let teacherTitle = block.querySelector('div.result-title').innerHTML;
+                let titleMatch = teacherTitle.match(
+                    /\s+(.+)\s+<br>\s*<h2[^>]*>([\s|\S]*)<\/h2>/);
+                let department = 
+                    titleMatch[1].match(/Professor in the ([\w|\s]+) department/)[1];
+                titleMatch = titleMatch[2].match(/<a[^>]*>([\s|\S]*)<\/a>,\s*(.*)/);
+                let schoolName = titleMatch[1];
+                let location = titleMatch[2];
+
+                let teacherRating = document.querySelector('div.rating-breakdown');
+                let quality = teacherRating.querySelector(
+                    'div.quality div.grade').innerHTML.trim();
+                let takeAgain = teacherRating.querySelector(
+                    'div.takeAgain div.grade').innerHTML.trim();
+                let difficulty = teacherRating.querySelector(
+                    'div.difficulty div.grade').innerHTML.trim();
 
                 let ratings = [].map.call(
                     document.querySelectorAll('tr > td.rating'),
@@ -67,16 +83,27 @@ const puppeteer = require('puppeteer');
                 );
                 return {
                     isNone: isNone,
-                    teacherName: [firstName, lastName],
-                    teacherTitle: title,
+                    teacher: {
+                        name: [firstName, lastName],
+                        title: {
+                            department: department,
+                            schoolName: schoolName,
+                            location: location,
+                            overallQuality: quality,
+                        },
+                        rating: {
+                            overallQuality: quality,
+                            wouldTakeAgain: takeAgain,
+                            levelOfDefficulty: difficulty,
+                        },
+                    },
                     ratings: ratings 
                 };
             } else
                 return { isNone: isNone };
         });
     }
-    console.log('Teacher: ', result.teacherName);
-    console.log('Teacher Title: ', result.teacherTitle);
+    console.log(result.teacher);
     let ratings = result.ratings;
     console.log(ratings.length);
     console.log(ratings[0]);
