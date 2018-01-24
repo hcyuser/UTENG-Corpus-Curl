@@ -19,28 +19,22 @@ if (process.argv.length < 3) {
 // Get teacher id from arguments
 let tid = process.argv[2];
 
+// Launch Chromium with no sandbox or
+//  it will throw an error for unknown reason. :(
 puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox']
 }).then(async browser => {
+    // Create and goto the ShowRatings.jsp?tid=<tid> of www.ratemyprofessors.com
     const page = await browser.newPage();
-    page.on('load', load => log('Finish Loading!'));
+    page.on('load', load => console.log("Finish Loading!"));
     const response_code = (await page.goto(URL + tid)).status();
+    if (response_code == 200) console.log('200 OK!');
     await browser.close();
+}).catch(err => {
+    console.error(err.message);
 });
 
 //let main = async () => {
-//    // Launch Chromium
-//    let args = { args: ['--no-sandbox', '--disable-setuid-sandbox'] };
-//    let browser;
-//    try {
-//        browser = await pp.launch(args);
-//    } catch (err) {
-//        console.error(err);
-//        console.error('Launch Chromium failed!');
-//    }
-//
-//    // Create and goto the ShowRatings.jsp?tid=<tid> of www.ratemyprofessors.com
-//    let page = await browser.newPage();
 //    await page.goto(URL + tid);
 //    
 //    // Check response status
