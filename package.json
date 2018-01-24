@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/hcyuser/UT_ENG_Curl#readme",
   "dependencies": {
-    "jsdom": "^11.6.0"
+    "puppeteer": "^1.0.0"
   }
 }
