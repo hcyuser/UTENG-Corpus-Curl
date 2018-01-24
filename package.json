@@ -4,7 +4,8 @@
   "description": "Just for installing npm package.",
   "main": "app.js",
   "scripts": {
-    "test": "node app.js"
+    "main": "node app.js",
+    "test": "node ppp.js"
   },
   "repository": {
     "type": "git",
