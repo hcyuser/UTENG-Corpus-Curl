@@ -11,10 +11,10 @@ const log = arg => console.log(
 
 const URL = 'http://www.ratemyprofessors.com/ShowRatings.jsp?tid='; 
 
-// If missing tid argument, exit with error code -1
+// If missing tid argument, exit with error code 1
 if (process.argv.length < 3) {
     console.error('Please giving a argument for "tid"');
-    return -1
+    process.exit(1);
 }
 // Get teacher id from arguments
 let tid = process.argv[2];
@@ -24,29 +24,49 @@ let tid = process.argv[2];
 puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox']
 }).then(async browser => {
-    // Create and goto the ShowRatings.jsp?tid=<tid> of www.ratemyprofessors.com
+    // Create new Page object and change default navigation timeout
     const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(20000);
+
+    // Create and goto the ShowRatings.jsp?tid=<tid> of www.ratemyprofessors.com
     page.on('load', load => console.log("Finish Loading!"));
-    const response_code = (await page.goto(URL + tid)).status();
-    if (response_code == 200) console.log('200 OK!');
+    let response;
+    try {
+        response = await page.goto(URL + tid);
+    } catch (err) {
+        console.error('----- Response Error -----');
+        console.error(err);
+    }
+
+    // May have to handle other situation for other response code.
+    if (response && response.status == 200) console.log('200 OK!');
+
+    // Check for invalid tid
+    let isNotFound
+    try {
+        isNotFound = await page.evaluate(
+            () => document.querySelector('div.header.error'));
+        if (isNotFound) console.error('Invalid Teacher ID!');
+        else log('Found!');
+    } catch (err) {
+        console.error(err);
+    }
+
+    // Looking for .loadMore button
+    let loadMore;
+    try {
+        loadMore = await page.evaluate(() => document.getElementById('loadMore'));
+        if (loadMore) console.log('Having load more....');
+        else console.log('no load more...');
+    } catch (err) {
+        console.error(err);
+    }
+
+    // Close Chromium
     await browser.close();
 }).catch(err => {
     console.error(err.message);
 });
 
-//let main = async () => {
-//    await page.goto(URL + tid);
-//    
-//    // Check response status
-//    page.on('response', response => {
-//        log(response);
-//    });
-//
-//    // Close Chromium
-//    await browser.close();
-//};
-//
-//main();
-
 // Error Code List
-/// -1: Missing tid argument
+/// 1: Missing tid argument
