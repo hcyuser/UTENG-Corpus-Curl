@@ -5,9 +5,9 @@
   "main": "app.js",
   "scripts": {
     "main": "node app.js",
-    "test": "node ppp.js 231419",
-    "NF": "node ppp.js 231420",
-    "noLoadMore": "node ppp.js 231519"
+    "test": "node curl.js 231419",
+    "NF": "node curl.js 231420",
+    "noLoadMore": "node curl.js 231519"
   },
   "repository": {
     "type": "git",
