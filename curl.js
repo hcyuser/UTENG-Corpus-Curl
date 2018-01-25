@@ -91,9 +91,9 @@ puppeteer.launch({
 				lastName.innerHTML.trim()
 			];
 		}, firstName, lastName);
-		firstName.dispose();
-		lastName.dispose();
-		name.dispose();
+		//firstName.dispose();
+		//lastName.dispose();
+		//name.dispose();
 
 		// Dump title of teacher
 		let titleHandle = await block.$('div.result-title')
@@ -107,7 +107,7 @@ puppeteer.launch({
 		teacher.Title.SchoolName = match[1];
 		teacher.Title.Location = match[2];
 
-		block.dispose();
+		//block.dispose();
 
 		// Dump rating of teacher
 		let ratingHandle = await page.$('div.rating-breakdown');
@@ -124,12 +124,12 @@ puppeteer.launch({
 				Difficulty: difficulty
 			};
 		}, ratingHandle);
-		ratingHandle.dispose();
+		//ratingHandle.dispose();
     }
     let connection = mysql.createConnection({
 		host: '104.199.250.176',
-		user: 'root',
-		password: 'root',
+		user: 'hcyidvtw',
+		password: 'hcyidvtw',
 		database: 'rating'
     });
     connection.connect();
@@ -206,17 +206,17 @@ puppeteer.launch({
         console.log('After: ' + filterRatings.length);
         let output = JSON.stringify({ Teacher: teacher, Ratings: ratings });
         fs.writeFileSync(tid + '.txt', output);
-        let input = fs.readFileSync(tid + '.txt');
-        log(JSON.parse(input).Ratings.length);
+        //let input = fs.readFileSync(tid + '.txt');
+        //log(JSON.parse(input).Ratings.length);
     }
 
 
     // Dispose all referencing element handles
-    if (isNotFound) await isNotFound.dispose();
-    if (loadMore) await loadMore.dispose();
+    //if (isNotFound) await isNotFound.dispose();
+    //if (loadMore) await loadMore.dispose();
 
     // Close Page
-    await page.close();
+    //await page.close();
     // Close Chromium
     await browser.close();
 }).catch(err => {
