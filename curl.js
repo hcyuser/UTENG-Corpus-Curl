@@ -81,71 +81,76 @@ puppeteer.launch({
     if (!isNotFound) {
         // Dump teacher's name
         let block = await page.$('div.top-info-block');
-        let name = await block.$('div.result-name');
-        let firstName = await name.$('span.pfname');
-        let lastName = await name.$('span.plname');
-        teacher.Name = await page.evaluate((firstName, lastName) => {
-            return [
-                firstName.innerHTML.trim(),
-                lastName.innerHTML.trim()
-            ];
-        }, firstName, lastName);
-        firstName.dispose();
-        lastName.dispose();
-        name.dispose();
+		if (!block) process.exit(2);
 
-        // Dump title of teacher
-        let titleHandle = await block.$('div.result-title')
-        let title = await page.evaluate(title => title.innerHTML, titleHandle);
-        titleHandle.dispose();
-        let match = title.match(/\s(.+)\s+<br>\s*<h2[^>]*>([\s|\S]*)<\/h2>/);
-        teacher.Title = {};
-        teacher.Title.Department = match[1].match(
-            /Professor in the ([\w\s]+) department/)[1];
-        match = match[2].match(/<a[^>]*>([\s|\S]*)<\/a>,\s*(.*)/);
-        teacher.Title.SchoolName = match[1];
-        teacher.Title.Location = match[2];
+		let name = await block.$('div.result-name');
+		let firstName = await name.$('span.pfname');
+		let lastName = await name.$('span.plname');
+		teacher.Name = await page.evaluate((firstName, lastName) => {
+			return [
+				firstName.innerHTML.trim(),
+				lastName.innerHTML.trim()
+			];
+		}, firstName, lastName);
+		firstName.dispose();
+		lastName.dispose();
+		name.dispose();
 
-        block.dispose();
+		// Dump title of teacher
+		let titleHandle = await block.$('div.result-title')
+		let title = await page.evaluate(title => title.innerHTML, titleHandle);
+		titleHandle.dispose();
+		let match = title.match(/\s(.+)\s+<br>\s*<h2[^>]*>([\s|\S]*)<\/h2>/);
+		teacher.Title = {};
+		teacher.Title.Department = match[1].match(
+			/Professor in the ([\w\s]+) department/)[1];
+		match = match[2].match(/<a[^>]*>([\s|\S]*)<\/a>,\s*(.*)/);
+		teacher.Title.SchoolName = match[1];
+		teacher.Title.Location = match[2];
 
-        // Dump rating of teacher
-        let ratingHandle = await page.$('div.rating-breakdown');
-        teacher.Rating = await page.evaluate(rating => {
-            let quality = rating.querySelector(
-                'div.quality div.grade').innerHTML.trim();
-            let takeAgain = rating.querySelector(
-                'div.takeAgain div.grade').innerHTML.trim();
-            let difficulty = rating.querySelector(
-                'div.difficulty div.grade').innerHTML.trim();
-            return {
-                Quality: quality,
-                TakeAgain: takeAgain,
-                Difficulty: difficulty
-            };
-        }, ratingHandle);
-        ratingHandle.dispose();
+		block.dispose();
+
+		// Dump rating of teacher
+		let ratingHandle = await page.$('div.rating-breakdown');
+		teacher.Rating = await page.evaluate(rating => {
+			let quality = rating.querySelector(
+				'div.quality div.grade').innerHTML.trim();
+			let takeAgain = rating.querySelector(
+				'div.takeAgain div.grade').innerHTML.trim();
+			let difficulty = rating.querySelector(
+				'div.difficulty div.grade').innerHTML.trim();
+			return {
+				Quality: quality,
+				TakeAgain: takeAgain,
+				Difficulty: difficulty
+			};
+		}, ratingHandle);
+		ratingHandle.dispose();
     }
     let connection = mysql.createConnection({
-	host: '104.199.250.176',
-	user: 'root',
-	password: 'root',
-	database: 'rating'
+		host: '104.199.250.176',
+		user: 'root',
+		password: 'root',
+		database: 'rating'
     });
     connection.connect();
 
-    let query = query => {
-	connection.query(query, (err, result, fields) => {
-	    if (err) console.error(err);
-	    else console.log(result);
-	});
-    };
+	let query = async (connection, queryString) => {
+		await connection.query(queryString, (err, result, fields) => {
+			if (err) console.error(err + "\n\n");
+			//console.log('queryResult:', result);
+		});
+	};
+	//let searchQuery = `SELECT id FROM professor WHERE id = '${teacher.TID}';`;
+	//console.log(searchQuery);
+	//let searchResult = await query(connection, searchQuery);
+	//log(searchResult);
 
-    let insertQuery = `INSERT INTO professor VALUES ('${teacher.TID}', '${teacher.Name[0]}', '${teacher.Name[1]}', '${teacher.Title.Department}', '${teacher.Title.SchoolName}', '${teacher.Title.Location}', '${teacher.Rating.Quality}', '${teacher.Rating.TakeAgain}', '${teacher.Rating.Difficulty}');`;
-    console.log(insertQuery);
-	query(insertQuery);
+	let insertQuery = `INSERT INTO professor VALUES ('${teacher.TID}', '${teacher.Name[0]}', '${teacher.Name[1]}', '${teacher.Title.Department}', '${teacher.Title.SchoolName}', '${teacher.Title.Location}', '${teacher.Rating.Quality}', '${teacher.Rating.TakeAgain}', '${teacher.Rating.Difficulty}') ON DUPLICATE KEY UPDATE id = '${teacher.TID}';`;
+	//console.log(insertQuery);
+	await query(connection, insertQuery);
 
-    connection.end();
-    //console.log({ Teacher: teacher});
+	console.log({ Teacher: teacher});
 
     // Dump rating comments
     let ratings;
@@ -178,6 +183,14 @@ puppeteer.launch({
         //log(ratings);
     }
 
+	ratings.forEach(async rating => {
+		let insertQuery = `INSERT INTO response VALUES (${rating.RID}, ${rating.TID}, ${connection.escape(rating.Comment)}, '${rating.Date}', '${rating.OverallQuality}', '${rating.LevelOfDifficulty}') ON DUPLICATE KEY UPDATE id = ${rating.RID};`;
+		//console.log(insertQuery);
+		await query(connection, insertQuery);
+	});
+
+	connection.end();
+
     //log({ Teacher: teacher, Ratings: ratings});
     if (!isNotFound) {
         // Remove duplicated rating
@@ -200,8 +213,8 @@ puppeteer.launch({
 
 
     // Dispose all referencing element handles
-    if (isNotFound) isNotFound.dispose();
-    if (loadMore) loadMore.dispose();
+    if (isNotFound) await isNotFound.dispose();
+    if (loadMore) await loadMore.dispose();
 
     // Close Page
     await page.close();
@@ -213,3 +226,4 @@ puppeteer.launch({
 
 // Error Code List
 /// 1: Missing tid argument
+/// 2: No comment for the professor
