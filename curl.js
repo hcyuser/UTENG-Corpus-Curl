@@ -155,12 +155,26 @@ puppeteer.launch({
         }, tid);
         //log(ratings);
     }
+
     //log({ Teacher: teacher, Ratings: ratings});
-    console.log(ratings.length);
-    let output = JSON.stringify({ Teacher: teacher, Ratings: ratings });
-    fs.writeFileSync(tid + '.txt', output);
-    let input = fs.readFileSync(tid + '.txt');
-    log(JSON.parse(input).Ratings.length);
+    if (!isNotFound) {
+        // Remove duplicated rating
+        console.log(ratings.length);
+        let filter = [];
+        let filterRatings = [];
+        let l = ratings.length;
+        for (let i = 0; i < l; i++) {
+            if (filter[ratings[i].RID]) continue;
+            filter[ratings[i].RID] = true;
+            filterRatings.push(ratings[i]);
+        }
+        console.log('Before: ' + ratings.length);
+        console.log('After: ' + filterRatings.length);
+        let output = JSON.stringify({ Teacher: teacher, Ratings: ratings });
+        fs.writeFileSync(tid + '.txt', output);
+        let input = fs.readFileSync(tid + '.txt');
+        log(JSON.parse(input).Ratings.length);
+    }
 
 
     // Dispose all referencing element handles
