@@ -99,7 +99,7 @@ puppeteer.launch({
         let match = title.match(/\s(.+)\s+<br>\s*<h2[^>]*>([\s|\S]*)<\/h2>/);
         teacher.Title = {};
         teacher.Title.Department = match[1].match(
-            /Professor in the ([\w\s]+) department/)[1];
+            /Professor in the ([^\n]+) department/)[1];
         match = match[2].match(/<a[^>]*>([\s|\S]*)<\/a>,\s*(.*)/);
         teacher.Title.SchoolName = match[1];
         teacher.Title.Location = match[2];
@@ -123,7 +123,7 @@ puppeteer.launch({
         }, ratingHandle);
         ratingHandle.dispose();
     }
-    //console.log({ Teacher: teacher});
+    console.log({ Teacher: teacher});
 
     // Dump rating comments
     let ratings;
