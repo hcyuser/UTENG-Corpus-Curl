@@ -1,3 +1,4 @@
+/* vim: set ts=4 sw=4 sts=4 nu: */
 // Require puppeteer node module for connecting with Chromium
 const puppeteer = require('puppeteer');
 // Require util module for display object in console
@@ -10,6 +11,7 @@ const log = arg => console.log(
     }));
 const sleep = require('sleep');
 const fs = require('fs');
+const mysql = require('mysql');
 
 const URL = 'http://www.ratemyprofessors.com/ShowRatings.jsp?tid='; 
 
@@ -123,6 +125,26 @@ puppeteer.launch({
         }, ratingHandle);
         ratingHandle.dispose();
     }
+    let connection = mysql.createConnection({
+	host: '104.199.250.176',
+	user: 'root',
+	password: 'root',
+	database: 'rating'
+    });
+    connection.connect();
+
+    let query = query => {
+	connection.query(query, (err, result, fields) => {
+	    if (err) console.error(err);
+	    else console.log(result);
+	});
+    };
+
+    let insertQuery = `INSERT INTO professor VALUES ('${teacher.TID}', '${teacher.Name[0]}', '${teacher.Name[1]}', '${teacher.Title.Department}', '${teacher.Title.SchoolName}', '${teacher.Title.Location}', '${teacher.Rating.Quality}', '${teacher.Rating.TakeAgain}', '${teacher.Rating.Difficulty}');`;
+    console.log(insertQuery);
+	query(insertQuery);
+
+    connection.end();
     //console.log({ Teacher: teacher});
 
     // Dump rating comments
