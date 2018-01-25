@@ -3,3 +3,6 @@
 
 # ignore npm modules.
 node_modules
+
+# ignore dump file, <tid>.txt
+*.txt
