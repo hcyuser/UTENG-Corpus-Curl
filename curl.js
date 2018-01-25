@@ -49,12 +49,11 @@ puppeteer.launch({
 
     // Check for invalid teacher id
     let isNotFound = await page.$('div.header.error');
-    try {
-        if (isNotFound) console.error('Invalid Teacher ID!');
-        else log('Found!');
-    } catch (err) {
-        console.error(err);
-    }
+	if (isNotFound) {
+		process.exit(3);
+		console.error('Invalid Teacher ID!');
+	}
+	else log('Found!');
 
     // Looking for load more button
     let loadMore = await page.$('#loadMore');
@@ -227,3 +226,4 @@ puppeteer.launch({
 // Error Code List
 /// 1: Missing tid argument
 /// 2: No comment for the professor
+/// 3: Invalid TID for not found page
