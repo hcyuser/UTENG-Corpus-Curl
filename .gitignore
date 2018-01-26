@@ -7,3 +7,6 @@ node_modules
 
 # ignore dump file, <tid>.txt
 *.txt
+
+# ignore log directory, ./log
+log
