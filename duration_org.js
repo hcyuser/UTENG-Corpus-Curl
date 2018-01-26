@@ -209,8 +209,6 @@ puppeteer.launch({
         console.log('After: ' + filterRatings.length);
         let output = JSON.stringify({ Teacher: teacher, Ratings: ratings });
         fs.writeFileSync(tid + '.txt', output);
-        //let input = fs.readFileSync(tid + '.txt');
-        //log(JSON.parse(input).Ratings.length);
     }
 
 
@@ -218,8 +216,6 @@ puppeteer.launch({
     //if (isNotFound) await isNotFound.dispose();
     //if (loadMore) await loadMore.dispose();
 
-    // Close Page
-    //await page.close();
     // Close Chromium
     await browser.close();
     
