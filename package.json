@@ -7,7 +7,8 @@
     "main": "node app.js",
     "test": "node curl.js 231419",
     "NF": "node curl.js 231420",
-    "noLoadMore": "node curl.js 231519"
+    "noLoadMore": "node curl.js 231519",
+    "duration": "node duration_org.js 1542"
   },
   "repository": {
     "type": "git",
