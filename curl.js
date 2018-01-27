@@ -145,7 +145,7 @@ puppeteer.launch({
 	//let searchResult = await query(connection, searchQuery);
 	//log(searchResult);
 
-	let insertQuery = `INSERT INTO professor VALUES ('${teacher.TID}', '${teacher.Name[0]}', '${teacher.Name[1]}', ${connection.escape(teacher.Title.Department)}, '${teacher.Title.SchoolName}', '${teacher.Title.Location}', '${teacher.Rating.Quality}', '${teacher.Rating.TakeAgain}', '${teacher.Rating.Difficulty}') ON DUPLICATE KEY UPDATE id = '${teacher.TID}';`;
+	let insertQuery = `INSERT INTO professor VALUES ('${teacher.TID}', '${teacher.Name[0]}', '${teacher.Name[1]}', ${connection.escape(teacher.Title.Department)}, ${connection.escape(teacher.Title.SchoolName)}, '${teacher.Title.Location}', '${teacher.Rating.Quality}', '${teacher.Rating.TakeAgain}', '${teacher.Rating.Difficulty}') ON DUPLICATE KEY UPDATE id = '${teacher.TID}';`;
 	//console.log(insertQuery);
 	await query(connection, insertQuery);
 
