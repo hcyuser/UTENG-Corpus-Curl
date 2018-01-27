@@ -27,9 +27,8 @@ let tid = process.argv[2];
 puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox']
 }).then(async browser => {
-    // Create new Page object and change default navigation timeout to 10 second
+    // Create new Page object
     const page = await browser.newPage();
-    page.setDefaultNavigationTimeout(10000);
 
     // For nonsense notification
     page.on('load', load => console.log("Finish Loading!"));
@@ -145,7 +144,7 @@ puppeteer.launch({
 	//let searchResult = await query(connection, searchQuery);
 	//log(searchResult);
 
-	let insertQuery = `INSERT INTO professor VALUES ('${teacher.TID}', '${teacher.Name[0]}', '${teacher.Name[1]}', ${connection.escape(teacher.Title.Department)}, ${connection.escape(teacher.Title.SchoolName)}, '${teacher.Title.Location}', '${teacher.Rating.Quality}', '${teacher.Rating.TakeAgain}', '${teacher.Rating.Difficulty}') ON DUPLICATE KEY UPDATE id = '${teacher.TID}';`;
+	let insertQuery = `INSERT INTO professor VALUES ('${teacher.TID}', ${connection.escape(teacher.Name[0])}, ${connection.escape(teacher.Name[1])}, ${connection.escape(teacher.Title.Department)}, ${connection.escape(teacher.Title.SchoolName)}, ${connection.escape(teacher.Title.Location)}, '${teacher.Rating.Quality}', '${teacher.Rating.TakeAgain}', '${teacher.Rating.Difficulty}') ON DUPLICATE KEY UPDATE id = '${teacher.TID}';`;
 	//console.log(insertQuery);
 	await query(connection, insertQuery);
 
