@@ -19,31 +19,56 @@ let timer_start = Date.now();
 const puppeteer = require('puppeteer');
 const util = require('util');
 const sleep = require('sleep');
-const fs = require('fs');
 const mysql = require('mysql');
+const fs = require('fs');
 
 /* Settings for Required Module */
 // puppeteer launch options: launch Chromium with no sandbox
 //  or it will throw an error for unknown reason.
-// log: extend result of util.inspect to console.log
+// dump: dump object detail
+// mysql connection options: database connection settings
 const puppeteer_launch_options = {
     args: ['--no-sandbox', '--disable-setuid-sandbox']
 };
-const log = arg => console.log(
+const dump = object =>
     util.inspect(arg, {
         showHidden: true,
         colors: true,
         showProxy: true,
-    })
-);
+    });
+const mysql_connection_options = {
+    host: '104.199.250.176',
+    user: 'hcyidvtw',
+    password: 'hcyidvtw',
+    database: 'rating'
+};
 
 // URL trunk for target website
 const URL_trunk = 'http://www.ratemyprofessors.com/ShowRatings.jsp';
 
+/* Launch Chrominum */
+puppeteer.launch(
+    puppeteer_launch_options
+).then(async browser => {
+    /* Create Page */
+    const page = await browser.newPage();
 
-/* For Debug: Show Timer */
-let timer_end = Date.now() - timer_start;
-console.log(`Running for ${timer_end / 1000} second!`);
+    /* Event Emitter */
+    page.on('load', load => console.log('Page Loaded!');
+
+
+    /* Close Chromium */
+    await browser.close();
+    console.log('Browser Closed!');
+
+    /* For Debug: Show Timer */
+    let timer_end = Date.now() - timer_start;
+    console.log(`Running for ${timer_end / 1000} second!`);
+
+}).catch(err => {
+    console.error(err);
+});
+
 
 
 /* Error Code List */
