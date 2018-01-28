@@ -40,6 +40,7 @@ puppeteer.launch({
     } catch (err) {
         console.error('----- Response Error -----');
         console.error(err);
+		process.exit(4);
     }
 
     // May have to handle other situation for other response code.
@@ -197,8 +198,10 @@ puppeteer.launch({
         let filterRatings = [];
         let l = ratings.length;
         for (let i = 0; i < l; i++) {
-            if (filter[ratings[i].RID]) continue;
-            filter[ratings[i].RID] = true;
+            if (filter[ratings[i].RID]) {
+				filter[ratings[i].RID] = true;
+				continue;
+			}
             filterRatings.push(ratings[i]);
         }
         console.log('Before: ' + ratings.length);
@@ -226,3 +229,4 @@ puppeteer.launch({
 /// 1: Missing tid argument
 /// 2: No comment for the professor
 /// 3: Invalid TID for not found page
+/// 4: Response Error
