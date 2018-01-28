@@ -1,4 +1,4 @@
-/* vim: set ts=4 sw=4 sts=4 ai si nu sc: */
+/* vim: set ts=4 sw=4 sts=4 ai si nu sc et: */
 
 // Retrieve arguments or exit(1) if missing necessary arguments
 if (process.argv.length < 3) {
@@ -240,7 +240,10 @@ puppeteer.launch(
             professor.TID
         ];
         let query = connection.query(sql, post, (err, result, fields) => {
-            if (err) throw err;
+            if (err) {
+                err.tid = tid;
+                throw err;
+            }
         });
         //console.log('SQL: ', query.sql);
 
@@ -259,7 +262,10 @@ puppeteer.launch(
                 rating.RID
             ];
             query = connection.query(sql, post, (err, result, fields) => {
-                if (err) throw err;
+                if (err) {
+                    err.tid = tid;
+                    throw err;
+                }
             });
         });
         //console.log('SQL: ', query.sql);
