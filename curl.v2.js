@@ -241,7 +241,6 @@ puppeteer.launch(
         ];
         let query = connection.query(sql, post, (err, result, fields) => {
             if (err) throw err;
-            console.log(result);
         });
         //console.log('SQL: ', query.sql);
 
