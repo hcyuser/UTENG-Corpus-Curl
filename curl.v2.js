@@ -241,6 +241,7 @@ puppeteer.launch(
         ];
         let query = connection.query(sql, post, (err, result, fields) => {
             if (err) throw err;
+            console.log(result);
         });
         //console.log('SQL: ', query.sql);
 
@@ -302,7 +303,7 @@ puppeteer.launch(
     let timer_end = Date.now() - timer_start;
     console.log(`Running for ${timer_end / 1000} second!`);
 
-    process.exit(0);
+    //process.exit(0);
 }).catch(err => {
     console.log(`----- Launch Error: ${tid} -----`);
     console.error(err);
