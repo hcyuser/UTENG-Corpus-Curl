@@ -13,7 +13,6 @@ const log = arg => console.log(
         colors: true,
         showProxy: true,
     }));
-const sleep = require('sleep');
 const fs = require('fs');
 const mysql = require('mysql');
 
@@ -36,6 +35,7 @@ puppeteer.launch({
 
     // For nonsense notification
     page.on('load', load => console.log("Finish Loading!"));
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
     let response;
     try {
         // Goto the http://www.ratemyprofessoers.com/ShowRatings.jsp with query
@@ -58,6 +58,20 @@ puppeteer.launch({
 	}
 	else log('Found!');
 
+    // Insert AjaxStop event for load more finish
+    let ajaxFinish = false;
+    page.on('console', msg => {
+        if (msg.text() == 'ajaxStop') ajaxFinish = true;
+    });
+    try {
+        await page.evaluate(
+            ajaxFinish => $(document).ajaxStop(
+                () => console.log('ajaxStop')
+            ), ajaxFinish);
+    } catch (err) {
+        console.error(err);
+    }
+
     // Looking for load more button
     let loadMore = await page.$('#loadMore');
     try {
@@ -67,8 +81,8 @@ puppeteer.launch({
             let isDisplayNone = false;
             while (!isDisplayNone) {
                 await page.evaluate(loadMore => loadMore.click(), loadMore);
-                // sleep 0.1 second for AJAX execution
-                sleep.msleep(300);
+                while (!await page.evaluate(ajaxFinish => ajaxFinish, ajaxFinish));
+                ajaxFinish = false;
                 isDisplayNone = await page.evaluate(
                     loadMore => loadMore.style.display.length != 0, loadMore);
             }
@@ -137,10 +151,9 @@ puppeteer.launch({
     });
     connection.connect();
 
-	let query = async (connection, queryString) => {
-		await connection.query(queryString, (err, result, fields) => {
-			if (err) console.error(err + "\n\n");
-			//console.log('queryResult:', result);
+	let query = (connection, queryString) => {
+		connection.query(queryString, (err, result, fields) => {
+			if (err) throw err;
 		});
 	};
 	//let searchQuery = `SELECT id FROM professor WHERE id = '${teacher.TID}';`;
@@ -150,8 +163,9 @@ puppeteer.launch({
 
 	let insertQuery = `INSERT INTO professor VALUES ('${teacher.TID}', '${teacher.Name[0]}', '${teacher.Name[1]}', ${connection.escape(teacher.Title.Department)}, '${teacher.Title.SchoolName}', '${teacher.Title.Location}', '${teacher.Rating.Quality}', '${teacher.Rating.TakeAgain}', '${teacher.Rating.Difficulty}') ON DUPLICATE KEY UPDATE id = '${teacher.TID}';`;
 	//console.log(insertQuery);
-	await query(connection, insertQuery);
+	query(connection, insertQuery);
 
+    console.log('----- Teacher -----');
 	console.log({ Teacher: teacher});
 
     // Dump rating comments
@@ -185,11 +199,16 @@ puppeteer.launch({
         //log(ratings);
     }
 
-	ratings.forEach(async rating => {
-		let insertQuery = `INSERT INTO response VALUES (${rating.RID}, ${rating.TID}, ${connection.escape(rating.Comment)}, '${rating.Date}', '${rating.OverallQuality}', '${rating.LevelOfDifficulty}') ON DUPLICATE KEY UPDATE id = ${rating.RID};`;
-		//console.log(insertQuery);
-		await query(connection, insertQuery);
-	});
+    try {
+        ratings.forEach(rating => {
+            insertQuery = `INSERT INTO response VALUES (${rating.RID}, ${rating.TID}, ${connection.escape(rating.Comment)}, '${rating.Date}', '${rating.OverallQuality}', '${rating.LevelOfDifficulty}') ON DUPLICATE KEY UPDATE id = ${rating.RID};`;
+            query(connection, insertQuery);
+        });
+    } catch (err) {
+        console.error(`----- Query Error: ${tid} -----`);
+        console.error(err);
+        process.exit(8);
+    }
 
 	connection.end();
 
@@ -201,8 +220,10 @@ puppeteer.launch({
         let filterRatings = [];
         let l = ratings.length;
         for (let i = 0; i < l; i++) {
-            if (filter[ratings[i].RID]) continue;
-            filter[ratings[i].RID] = true;
+            if (filter[ratings[i].RID]) {
+                filter[ratings[i].RID] = true;
+                continue;
+            }
             filterRatings.push(ratings[i]);
         }
         console.log('Before: ' + ratings.length);
